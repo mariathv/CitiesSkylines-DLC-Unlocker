@@ -1,8 +1,15 @@
-# React + Vite
+<h1 align="center" id="title">Travel Management System</h1>
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-Currently, two official plugins are available:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+<p id="description">Cities Skylines DLC Unlocker</p>
+
+  
+<h2>💻 Built with</h2>
+
+Technologies used in the project:
+
+[![Static_Badge](https://img.shields.io/badge/java-red)](https://img.shields.io/badge/ReactJS%20-%20blue)
+[![Static_Badge](https://img.shields.io/badge/javafx-blue)](https://img.shields.io/badge/Javascript%20-%20red)
+![Static Badge](https://img.shields.io/badge/HTML%2FCSS%20-%20orange)
+
