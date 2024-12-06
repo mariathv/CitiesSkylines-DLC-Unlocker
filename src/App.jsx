@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import CreamDetail from "./components/CreamDet";
 import {
   ChakraProvider,
   Box,
@@ -14,10 +15,20 @@ import {
 import { keyframes } from "@emotion/react"; // Correct import
 
 const hoverAnimation = keyframes`
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  50% {
+    transform: scale(1.01);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
 `;
+
 
 const theme = extendTheme({
   styles: {
@@ -37,7 +48,7 @@ const theme = extendTheme({
         _hover: {
           bg: "white !important",
           color: "black !important",
-          animation: `${hoverAnimation} 0.4s ease-in-out`,
+          animation: `${hoverAnimation} 0.5s ease-in-out`,
         },
         _active: {
           bg: "gray.700",
@@ -66,23 +77,61 @@ const theme = extendTheme({
 import { useFetchCS, useFetchDLCs } from './hooks/useFetch';
 
 function App() {
+  const [inidata, setIniData] = useState(null);
   const [selectedDLCs, setSelectedDLCs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showDownloadButton, setShowDownloadButton] = useState(false);
-
+  let dlcs_tk;
+  let dlcs_val;
   const handleGenerate = () => {
-    const selectedIDs = selectedDLCs.map(
-      (dlcName) => Object.keys(dlcs_tk).find((key) => dlcs_tk[key] === dlcName)
-    );
-    console.log("GENERATE CREAM, ", selectedIDs);
+    const selectedIDs = selectedDLCs.reduce((acc, dlcName) => {
+      const key = Object.keys(dlcs_tk).find((key) => dlcs_tk[key] === dlcName);
+      if (key) {
+        acc[key] = dlcName;
+      }
+      return acc;
+    }, {});
+
+    setIniData(selectedIDs);
     setLoading(true);
 
     setTimeout(() => {
       setLoading(false);
       setShowDownloadButton(true);
     }, 2000);
-
   };
+
+  const downloadFile = (content) => {
+    const blob = new Blob([content], { type: 'text/plain' });
+
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'cream_api.ini';
+
+    link.click();
+
+    URL.revokeObjectURL(url);
+  };
+
+  const generateCreamApid = () => {
+
+    fetch('http://localhost:5000/generate-creamapid', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ inidata })
+    })
+      .then(response => response.json())
+      .then(data => {
+        downloadFile(data.updatedContent);
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+  }
 
   useEffect(() => {
     if (showDownloadButton) {
@@ -91,7 +140,7 @@ function App() {
   }, [showDownloadButton]);
 
   const handleDownload = () => {
-    alert("File downloaded!");
+    generateCreamApid();
   };
 
   let storageflag = false;
@@ -101,14 +150,13 @@ function App() {
   if (storedToken)
     decodedList = JSON.parse(atob(storedToken));
 
-  let dlcs_tk;
+
   if (storedToken && storedToken.trim() !== "") {
     storageflag = true;
-    console.log("retrieving from local storage");
     dlcs_tk = decodedList;
+    dlcs_val = Object.keys(decodedList);
   } else {
     storageflag = false;
-    console.log("retrieving from api");
     const { data, loading, error } = useFetchCS();
     const [dlcs, setDlcs] = useState({});
     const [loadingDLCs, setLoadingDLCs] = useState(true);
@@ -126,6 +174,7 @@ function App() {
     }, [fetchedDlcs, dlcsLoading, dlcsError]);
 
     dlcs_tk = dlcs;
+    dlcs_val = Object.keys(dlcs_val);
   }
 
 
@@ -145,7 +194,7 @@ function App() {
         <Container maxW="container.md" py={8}>
           <VStack spacing={6}>
             <Heading as="h1" size="xl">
-              Cities Skylines - Cream Generator
+              Cities Skylines - CreamAPI Generator
             </Heading>
             <Box
               bg="white"
@@ -156,6 +205,21 @@ function App() {
               border="1px solid black"
             >
               <VStack align="stretch" spacing={4}>
+                <Checkbox
+                  isChecked={selectedDLCs.length === dlcList.length} // Check if all are selected
+                  isIndeterminate={
+                    selectedDLCs.length > 0 && selectedDLCs.length < dlcList.length
+                  } // Show indeterminate state if not all selected but some are
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedDLCs(dlcList); // Select all
+                    } else {
+                      setSelectedDLCs([]); // Deselect all
+                    }
+                  }}
+                >
+                  Select All
+                </Checkbox>
                 <Box maxH="400px" overflowY="auto">
                   <CheckboxGroup
                     colorScheme="blackAlpha"
@@ -179,20 +243,34 @@ function App() {
                 </Button>
               </VStack>
             </Box>
+            <CreamDetail />
             {showDownloadButton && (
               <Button
                 id="download-button"
                 onClick={handleDownload}
                 size="lg"
-                variant="solid"
-                borderRadius="full"
+                bg="black"
+                color="white"
+                _hover={{
+                  bg: "gray.800",
+                  transform: "scale(1.05)",
+                  transition: "transform 0.2s ease-in-out",
+                }}
+                _active={{
+                  bg: "gray.900",
+                }}
+                borderRadius="md"
+                fontWeight="semibold"
+                boxShadow="lg"
+                padding="1.5rem"
               >
-                Download File
+                Download File (cream_api.ini)
               </Button>
             )}
           </VStack>
         </Container>
-      </ChakraProvider>
+      </ChakraProvider >
+
     );
   }
 }
