@@ -1,8 +1,4 @@
-<h1 align="center" id="title">Travel Management System</h1>
-
-
-
-<p id="description">Cities Skylines DLC Unlocker</p>
+<h1 align="center" id="title">Cities Skylines DLC Unlocker</h1
 
   
 <h2>💻 Built with</h2>
