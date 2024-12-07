@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react';
 
+const steamcn_api = import.meta.env.VITE_KGUYSH_STEAM_CN_API
+
 // useFetchCS fetches DLC IDs
 const useFetchCS = () => {
+
+
+
   const [data, setData] = useState(null);    // Store the data from the API
   const [loading, setLoading] = useState(true); // Track loading state
   const [error, setError] = useState(null);   // Track error state
 
-  const url = "http://localhost:5000/api/getDetailCS";
-
+  const url = `${steamcn_api}/api/getDetailCS`;
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -31,16 +35,16 @@ const useFetchCS = () => {
 };
 
 const useFetchDLCs = (ids) => {
+
   const [dlcs, setDlcs] = useState({});
   const [loadingDLCs, setLoadingDLCs] = useState(true);
   const [errorDLCs, setErrorDLCs] = useState(null);
   useEffect(() => {
     const fetchData = async () => {
-      console.log("gonna fetch data");
       try {
         setLoadingDLCs(true);
         const promises = ids.map(async (id) => {
-          const url = `http://localhost:5000/api/getDetailDLC/${id}`;
+          const url = `${steamcn_api}/api/getDetailDLC/${id}`;
           const response = await fetch(url);
           if (!response.ok) {
             throw new Error(`Failed to fetch data for ID: ${id}`);
